@@ -1,0 +1,39 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: students
+      POSTGRES_PASSWORD: students
+      POSTGRES_DB: students
+    ports: ["5432:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U students"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  redis:
+    image: redis:7-alpine
+    ports: ["6379:6379"]
+
+  # S3-compatible object storage (MinIO's Docker Hub image is no longer published).
+  s3:
+    image: rustfs/rustfs:latest
+    environment:
+      RUSTFS_ACCESS_KEY: minio
+      RUSTFS_SECRET_KEY: minio12345
+      RUSTFS_CONSOLE_ENABLE: "true"
+      # Browser uploads (Expo web, dashboard) in dev
+      RUSTFS_CORS_ALLOWED_ORIGINS: "http://localhost:3000,http://localhost:8081"
+    ports: ["9000:9000", "9001:9001"]
+    volumes: [s3data:/data]
+
+  # Catches outgoing email (OTP codes etc.) locally: UI at http://localhost:8025
+  mailpit:
+    image: axllent/mailpit:latest
+    ports: ["1025:1025", "8025:8025"]
+
+volumes:
+  pgdata:
+  s3data:
