@@ -7,6 +7,9 @@ const links = [
   { href: "/landlord", label: "Overview", exact: true },
   { href: "/landlord/residences", label: "Residences" },
   { href: "/landlord/applications", label: "Applications" },
+  { href: "/landlord/residents", label: "Residents" },
+  { href: "/landlord/maintenance", label: "Maintenance" },
+  { href: "/landlord/announcements", label: "Announcements" },
 ];
 
 export function LandlordNav() {

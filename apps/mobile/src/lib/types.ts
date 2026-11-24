@@ -1,4 +1,14 @@
-import type { ApplicationStatus, DocumentKind, FundingType, GenderPolicy, ResidenceType, Role } from '@students/shared';
+import type {
+  ApplicationStatus,
+  DocumentKind,
+  FundingType,
+  GenderPolicy,
+  MaintenanceCategory,
+  MaintenancePriority,
+  MaintenanceStatus,
+  ResidenceType,
+  Role,
+} from '@students/shared';
 
 // Response shapes of the API endpoints the app uses.
 
@@ -44,6 +54,7 @@ export type Residency =
         status: 'PENDING_MOVE_IN' | 'ACTIVE';
         startDate: string;
         endDate: string;
+        movedInAt: string | null;
         monthlyRentCents: number;
         fundedBy: FundingType;
         room: string;
@@ -114,4 +125,51 @@ export interface Application {
   roomType: { id: string; name: string; monthlyRentCents: number };
   documents: ApplicationDocument[];
   lease?: { startDate: string; endDate: string; bed: { label: string; room: { label: string } } } | null;
+}
+
+export interface Announcement {
+  id: string;
+  title: string;
+  body: string;
+  pinned: boolean;
+  publishedAt: string;
+  read: boolean;
+  author: { firstName: string | null; lastName: string | null };
+}
+
+export interface AppNotification {
+  id: string;
+  title: string;
+  body: string;
+  data: { type?: string; id?: string } | null;
+  readAt: string | null;
+  createdAt: string;
+}
+
+export interface MaintenanceSummary {
+  id: string;
+  category: MaintenanceCategory;
+  title: string;
+  status: MaintenanceStatus;
+  priority: MaintenancePriority;
+  location: string | null;
+  createdAt: string;
+  updatedAt: string;
+  _count: { comments: number };
+}
+
+export interface MaintenanceComment {
+  id: string;
+  body: string;
+  isSystem: boolean;
+  createdAt: string;
+  author: { id: string; firstName: string | null; lastName: string | null; role: Role };
+}
+
+export interface MaintenanceDetail extends Omit<MaintenanceSummary, "_count"> {
+  description: string;
+  photoUrls: string[];
+  resolvedAt: string | null;
+  assignee: { firstName: string | null; lastName: string | null } | null;
+  comments: MaintenanceComment[];
 }

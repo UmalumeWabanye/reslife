@@ -55,3 +55,38 @@ export const toneColors: Record<Tone, { fg: string; bg: string }> = {
 };
 
 export type { Tone };
+
+export const maintenanceStatus: Record<import('@students/shared').MaintenanceStatus, { label: string; tone: Tone }> = {
+  OPEN: { label: 'Reported', tone: 'info' },
+  ASSIGNED: { label: 'Assigned', tone: 'info' },
+  IN_PROGRESS: { label: 'In progress', tone: 'warning' },
+  RESOLVED: { label: 'Resolved', tone: 'success' },
+  CLOSED: { label: 'Closed', tone: 'neutral' },
+};
+
+export const maintenanceCategory: Record<import('@students/shared').MaintenanceCategory, string> = {
+  PLUMBING: 'Plumbing',
+  ELECTRICAL: 'Electrical',
+  FURNITURE: 'Furniture',
+  WIFI: 'Wi-Fi',
+  APPLIANCE: 'Appliance',
+  SECURITY: 'Security',
+  CLEANING: 'Cleaning',
+  OTHER: 'Other',
+};
+
+export const priorityLabel: Record<import('@students/shared').MaintenancePriority, string> = {
+  LOW: 'Low',
+  MEDIUM: 'Normal',
+  HIGH: 'High',
+  URGENT: 'Urgent',
+};
+
+export const timeAgo = (iso: string) => {
+  const s = Math.max(0, (Date.now() - new Date(iso).getTime()) / 1000);
+  if (s < 60) return 'just now';
+  if (s < 3600) return `${Math.floor(s / 60)}m ago`;
+  if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
+  if (s < 7 * 86400) return `${Math.floor(s / 86400)}d ago`;
+  return new Date(iso).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short' });
+};

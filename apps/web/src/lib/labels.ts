@@ -1,4 +1,13 @@
-import type { ApplicationStatus, DocumentKind, FundingType, GenderPolicy, ResidenceType } from "@students/shared";
+import type {
+  ApplicationStatus,
+  DocumentKind,
+  FundingType,
+  GenderPolicy,
+  MaintenanceCategory,
+  MaintenancePriority,
+  MaintenanceStatus,
+  ResidenceType,
+} from "@students/shared";
 
 export const residenceTypeLabel: Record<ResidenceType, string> = {
   PRIVATE: "Private",
@@ -45,3 +54,44 @@ export const fmtDate = (d: string | Date) =>
 
 export const fullName = (u: { firstName: string | null; lastName: string | null }) =>
   [u.firstName, u.lastName].filter(Boolean).join(" ") || "—";
+
+
+export const maintenanceStatusMeta: Record<MaintenanceStatus, { label: string; tone: Tone }> = {
+  OPEN: { label: "New", tone: "info" },
+  ASSIGNED: { label: "Assigned", tone: "info" },
+  IN_PROGRESS: { label: "In progress", tone: "warning" },
+  RESOLVED: { label: "Resolved", tone: "success" },
+  CLOSED: { label: "Closed", tone: "neutral" },
+};
+
+export const priorityMeta: Record<MaintenancePriority, { label: string; tone: Tone }> = {
+  LOW: { label: "Low", tone: "neutral" },
+  MEDIUM: { label: "Normal", tone: "neutral" },
+  HIGH: { label: "High", tone: "warning" },
+  URGENT: { label: "Urgent", tone: "danger" },
+};
+
+export const maintenanceCategoryLabel: Record<MaintenanceCategory, string> = {
+  PLUMBING: "Plumbing",
+  ELECTRICAL: "Electrical",
+  FURNITURE: "Furniture",
+  WIFI: "Wi-Fi",
+  APPLIANCE: "Appliance",
+  SECURITY: "Security",
+  CLEANING: "Cleaning",
+  OTHER: "Other",
+};
+
+export const leaseStatusMeta: Record<string, { label: string; tone: Tone }> = {
+  PENDING_MOVE_IN: { label: "Awaiting move-in", tone: "info" },
+  ACTIVE: { label: "Living here", tone: "success" },
+  ENDED: { label: "Moved out", tone: "neutral" },
+  TERMINATED: { label: "Terminated", tone: "danger" },
+};
+
+export function timeAgo(iso: string, now: number) {
+  const s = Math.max(0, (now - new Date(iso).getTime()) / 1000);
+  if (s < 3600) return `${Math.max(1, Math.floor(s / 60))}m ago`;
+  if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
+  return `${Math.floor(s / 86400)}d ago`;
+}

@@ -35,7 +35,7 @@ export function PageHeader({ title, description, actions }: { title: string; des
 }
 
 const buttonBase =
-  "inline-flex items-center justify-center gap-2 rounded-lg px-3.5 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50";
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg px-3.5 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50";
 const buttonVariant = {
   primary: "bg-brand text-white hover:bg-blue-800",
   secondary: "border border-slate-300 bg-white text-slate-800 hover:bg-slate-50",

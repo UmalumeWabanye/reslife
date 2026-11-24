@@ -28,6 +28,9 @@ pnpm mobile         # student app, in a second terminal: press w for the browser
   `pnpm dev` and `pnpm mobile`. Phone and computer must be on the same Wi-Fi. Re-run it if your IP changes;
   `pnpm phone-env --reset` goes back to localhost.
 
+- **Changed `packages/shared` or the Prisma schema?** Rebuild it (`pnpm --filter @students/shared build`,
+  `pnpm db:migrate`) and restart `pnpm dev`; the dashboard keeps the old copy until it restarts.
+
 ### Browser support
 The dashboard (and the student app's web build) target current browsers: Chrome/Edge 111+, Firefox 128+,
 Safari / iOS Safari 16.4+ — the Next.js 16 and Tailwind CSS 4 baselines.
@@ -65,5 +68,8 @@ and accepts it in the app. Each run creates (then unpublishes) its own one-bed r
 - **Documents** upload straight to S3 with presigned URLs; landlords open them through short-lived links.
 - **Dashboard auth:** httpOnly cookies; `src/proxy.ts` refreshes the access token before pages render and routes by role.
 - **Tenant isolation:** landlord routes resolve the caller's organisation and return 404 for anything outside it.
+- **Residence life:** landlords move residents in (pending lease → active), post announcements (optionally emailed),
+  and work maintenance requests (assign, status, replies). Students report problems with photos once moved in, follow
+  the thread and confirm fixes. Status changes notify the student in the app (`/me/notifications`).
 - **Offer flow:** landlord accepts with a bed (row-locked, no overlapping leases) → student accepts → other open applications for that year are withdrawn.
 - Money is integer cents (ZAR).

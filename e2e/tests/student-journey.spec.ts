@@ -129,7 +129,8 @@ test("student applies, landlord offers a bed, student moves into the residence s
   await mobile.getByRole("button", { name: "Accept offer" }).click();
 
   await expect(mobile.getByText("Welcome to")).toBeVisible();
-  await expect(mobile.getByText(residenceName)).toBeVisible();
+  // Other residence tabs (e.g. News) stay mounted on web and mention the name too.
+  await expect(mobile.getByText(residenceName, { exact: true }).first()).toBeVisible();
   await expect(mobile.getByText("E1 · bed A")).toBeVisible();
 
   // ── Landlord: bed now shows as allocated, application as accepted ──

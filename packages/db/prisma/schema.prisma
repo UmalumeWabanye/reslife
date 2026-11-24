@@ -136,6 +136,10 @@ model User {
   isActive       Boolean         @default(true)
   studentProfile StudentProfile?
   memberships    OrganisationMember[]
+  announcements       Announcement[]
+  reportedMaintenance MaintenanceRequest[] @relation("MaintenanceReporter")
+  assignedMaintenance MaintenanceRequest[] @relation("MaintenanceAssignee")
+  maintenanceComments MaintenanceComment[]
   refreshTokens  RefreshToken[]
   deviceTokens   DeviceToken[]
   notifications  Notification[]
@@ -335,7 +339,10 @@ model Lease {
   monthlyRentCents Int
   fundedBy         FundingType
   status           LeaseStatus  @default(PENDING_MOVE_IN)
+  movedInAt        DateTime?
+  movedOutAt       DateTime?
   invoices         Invoice[]
+  maintenance      MaintenanceRequest[]
   createdAt        DateTime     @default(now())
   updatedAt        DateTime     @updatedAt
 
@@ -349,10 +356,13 @@ model Announcement {
   residenceId String
   residence   Residence          @relation(fields: [residenceId], references: [id], onDelete: Cascade)
   authorId    String
+  author      User               @relation(fields: [authorId], references: [id])
   title       String
   body        String
   pinned      Boolean            @default(false)
+  emailed     Boolean            @default(false)
   publishedAt DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
   reads       AnnouncementRead[]
 
   @@index([residenceId, publishedAt])
@@ -372,8 +382,11 @@ model MaintenanceRequest {
   residenceId  String
   residence    Residence            @relation(fields: [residenceId], references: [id], onDelete: Cascade)
   leaseId      String
+  lease        Lease                @relation(fields: [leaseId], references: [id], onDelete: Cascade)
   reporterId   String
+  reporter     User                 @relation("MaintenanceReporter", fields: [reporterId], references: [id])
   assigneeId   String?
+  assignee     User?                @relation("MaintenanceAssignee", fields: [assigneeId], references: [id])
   category     String // plumbing, electrical, furniture, wifi, other
   title        String
   description  String
@@ -394,8 +407,13 @@ model MaintenanceComment {
   requestId String
   request   MaintenanceRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
   authorId  String
+  author    User               @relation(fields: [authorId], references: [id])
   body      String
+  /// System entries record status/priority/assignee changes in the thread.
+  isSystem  Boolean            @default(false)
   createdAt DateTime           @default(now())
+
+  @@index([requestId, createdAt])
 }
 
 // ─── Billing ────────────────────────────────────────────────────────────

@@ -1,6 +1,10 @@
 import { z } from "zod";
 import {
   ApplicationStatuses,
+  LeaseStatuses,
+  MaintenanceCategories,
+  MaintenancePriorities,
+  MaintenanceStatuses,
   DocumentKinds,
   FundingTypes,
   GenderPolicies,
@@ -150,3 +154,62 @@ export const uploadRequestSchema = z.object({
   contentType: z.string().min(1),
 });
 export type UploadRequest = z.infer<typeof uploadRequestSchema>;
+
+// ─── Announcements ───
+
+export const announcementInputSchema = z.object({
+  residenceId: z.string().min(1),
+  title: z.string().trim().min(3).max(120),
+  body: z.string().trim().min(1).max(5000),
+  pinned: z.boolean().default(false),
+  /** Also email every current resident. */
+  sendEmail: z.boolean().default(false),
+});
+export type AnnouncementInput = z.infer<typeof announcementInputSchema>;
+
+export const announcementUpdateSchema = announcementInputSchema.pick({ title: true, body: true, pinned: true }).partial();
+
+// ─── Maintenance ───
+
+export const maintenanceCreateSchema = z.object({
+  category: z.enum(MaintenanceCategories),
+  title: z.string().trim().min(3).max(120),
+  description: z.string().trim().min(5).max(3000),
+  location: z.string().trim().max(120).optional(),
+  priority: z.enum(MaintenancePriorities).default("MEDIUM"),
+  photoKeys: z.array(z.string().min(1)).max(5).default([]),
+});
+export type MaintenanceCreate = z.infer<typeof maintenanceCreateSchema>;
+
+export const maintenanceUpdateSchema = z
+  .object({
+    status: z.enum(MaintenanceStatuses),
+    priority: z.enum(MaintenancePriorities),
+    /** null unassigns. */
+    assigneeId: z.string().min(1).nullable(),
+  })
+  .partial()
+  .refine((v) => Object.keys(v).length > 0, "Nothing to update");
+export type MaintenanceUpdate = z.infer<typeof maintenanceUpdateSchema>;
+
+export const maintenanceCommentSchema = z.object({ body: z.string().trim().min(1).max(2000) });
+
+export const maintenanceListQuerySchema = z.object({
+  residenceId: z.string().optional(),
+  status: z.enum(MaintenanceStatuses).optional(),
+  priority: z.enum(MaintenancePriorities).optional(),
+  /** "open" = everything not RESOLVED/CLOSED. */
+  view: z.enum(["open", "all"]).default("open"),
+});
+
+// ─── Leases ───
+
+export const leaseListQuerySchema = z.object({
+  residenceId: z.string().optional(),
+  status: z.enum(LeaseStatuses).optional(),
+});
+
+export const leaseEndSchema = z.object({
+  reason: z.enum(["ENDED", "TERMINATED"]).default("ENDED"),
+  note: z.string().trim().max(500).optional(),
+});

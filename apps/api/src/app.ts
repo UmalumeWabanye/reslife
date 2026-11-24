@@ -14,6 +14,9 @@ import { meRoutes } from "./modules/me/routes.js";
 import { landlordResidenceRoutes } from "./modules/residences/landlord-routes.js";
 import { residenceRoutes } from "./modules/residences/routes.js";
 import { uploadRoutes } from "./modules/uploads/routes.js";
+import { landlordAnnouncementRoutes, residenceAnnouncementRoutes } from "./modules/announcements/routes.js";
+import { landlordLeaseRoutes } from "./modules/leases/routes.js";
+import { landlordMaintenanceRoutes, residenceMaintenanceRoutes } from "./modules/maintenance/routes.js";
 
 export async function buildApp(opts: FastifyServerOptions = {}) {
   const app = Fastify({ logger: env.NODE_ENV !== "test", ...opts });
@@ -52,6 +55,12 @@ export async function buildApp(opts: FastifyServerOptions = {}) {
   await app.register(uploadRoutes, { prefix: "/uploads" });
   await app.register(landlordResidenceRoutes, { prefix: "/landlord" });
   await app.register(landlordApplicationRoutes, { prefix: "/landlord" });
+  await app.register(landlordAnnouncementRoutes, { prefix: "/landlord" });
+  await app.register(landlordMaintenanceRoutes, { prefix: "/landlord" });
+  await app.register(landlordLeaseRoutes, { prefix: "/landlord" });
+  // Student residence space (requires a current lease).
+  await app.register(residenceAnnouncementRoutes, { prefix: "/residence" });
+  await app.register(residenceMaintenanceRoutes, { prefix: "/residence" });
 
   return app;
 }

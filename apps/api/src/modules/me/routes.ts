@@ -3,6 +3,7 @@ import { prisma } from "@students/db";
 import { studentProfileUpdateSchema } from "@students/shared";
 import { parse } from "../../lib/errors.js";
 import { getStudentProfile, requireStudent } from "../../lib/guards.js";
+import { residentLeaseWhere } from "../../lib/residency.js";
 
 export async function meRoutes(app: FastifyInstance) {
   app.addHook("preHandler", requireStudent);
@@ -25,11 +26,7 @@ export async function meRoutes(app: FastifyInstance) {
   app.get("/residency", async (request) => {
     const student = await getStudentProfile(request.user.sub);
     const lease = await prisma.lease.findFirst({
-      where: {
-        studentId: student.id,
-        status: { in: ["PENDING_MOVE_IN", "ACTIVE"] },
-        OR: [{ applicationId: null }, { application: { status: "ACCEPTED_BY_STUDENT" } }],
-      },
+      where: { studentId: student.id, ...residentLeaseWhere },
       orderBy: { startDate: "desc" },
       include: {
         bed: {
@@ -70,6 +67,7 @@ export async function meRoutes(app: FastifyInstance) {
         status: lease.status,
         startDate: lease.startDate,
         endDate: lease.endDate,
+        movedInAt: lease.movedInAt,
         monthlyRentCents: lease.monthlyRentCents,
         fundedBy: lease.fundedBy,
         room: lease.bed.room.label,
@@ -77,5 +75,20 @@ export async function meRoutes(app: FastifyInstance) {
         roomType: roomType.name,
       },
     };
+  });
+
+  app.get("/notifications", async (request) => {
+    const items = await prisma.notification.findMany({
+      where: { userId: request.user.sub },
+      orderBy: { createdAt: "desc" },
+      take: 30,
+    });
+    const unread = await prisma.notification.count({ where: { userId: request.user.sub, readAt: null } });
+    return { unread, items };
+  });
+
+  app.post("/notifications/read-all", async (request) => {
+    await prisma.notification.updateMany({ where: { userId: request.user.sub, readAt: null }, data: { readAt: new Date() } });
+    return { ok: true };
   });
 }

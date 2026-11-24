@@ -133,3 +133,63 @@ export interface ApplicationDetail {
     user: { firstName: string | null; lastName: string | null; email: string; phone: string | null };
   };
 }
+
+export interface LeaseListItem {
+  id: string;
+  status: "PENDING_MOVE_IN" | "ACTIVE" | "ENDED" | "TERMINATED";
+  startDate: string;
+  endDate: string;
+  movedInAt: string | null;
+  movedOutAt: string | null;
+  monthlyRentCents: number;
+  fundedBy: import("@students/shared").FundingType;
+  bed: { label: string; room: { label: string; roomType: { name: string; residence: { id: string; name: string } } } };
+  student: {
+    studentNumber: string;
+    institution: { shortName: string };
+    user: { firstName: string | null; lastName: string | null; email: string; phone: string | null };
+  };
+  _count: { maintenance: number };
+}
+
+export interface AnnouncementListItem {
+  id: string;
+  title: string;
+  body: string;
+  pinned: boolean;
+  emailed: boolean;
+  publishedAt: string;
+  residence: { id: string; name: string };
+  author: { firstName: string | null; lastName: string | null };
+  readCount: number;
+  audience: number;
+}
+
+type Person = { firstName: string | null; lastName: string | null };
+
+export interface MaintenanceListItem {
+  id: string;
+  title: string;
+  category: import("@students/shared").MaintenanceCategory;
+  status: import("@students/shared").MaintenanceStatus;
+  priority: import("@students/shared").MaintenancePriority;
+  location: string | null;
+  createdAt: string;
+  updatedAt: string;
+  residence: { id: string; name: string };
+  reporter: Person;
+  assignee: Person | null;
+  lease: { bed: { label: string; room: { label: string } } };
+  _count: { comments: number };
+}
+
+export interface MaintenanceDetail extends Omit<MaintenanceListItem, "_count" | "reporter" | "assignee"> {
+  description: string;
+  resolvedAt: string | null;
+  photoUrls: string[];
+  reporter: Person & { id: string; email: string; phone: string | null };
+  assignee: (Person & { id: string }) | null;
+  comments: { id: string; body: string; isSystem: boolean; createdAt: string; author: Person & { id: string; role: string } }[];
+  staff: (Person & { id: string; email: string })[];
+  allowedStatuses: import("@students/shared").MaintenanceStatus[];
+}

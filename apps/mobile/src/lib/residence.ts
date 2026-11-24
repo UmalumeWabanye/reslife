@@ -1,3 +1,5 @@
+import { useFocusEffect } from 'expo-router';
+import { useCallback } from 'react';
 import { useSession } from './session';
 import type { Residency } from './types';
 
@@ -8,4 +10,17 @@ export function useResidence(): InResidence {
   const { residency } = useSession();
   if (residency?.mode !== 'residence') throw new Error('useResidence used outside the residence space');
   return residency;
+}
+
+/**
+ * Re-checks the lease whenever the screen is focused, so a move-in (or the lease ending)
+ * done on the dashboard shows up without restarting the app.
+ */
+export function useRefreshResidencyOnFocus() {
+  const { refresh } = useSession();
+  useFocusEffect(
+    useCallback(() => {
+      refresh();
+    }, [refresh]),
+  );
 }

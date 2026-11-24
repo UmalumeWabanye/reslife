@@ -3,28 +3,37 @@ import Link from "next/link";
 import { Badge, ButtonLink, Card, Empty, PageHeader, Stat } from "@/components/ui";
 import { api } from "@/lib/api";
 import { fmtDate, fullName, statusMeta } from "@/lib/labels";
-import type { ApplicationListItem, ResidenceListItem } from "@/lib/types";
+import type { ApplicationListItem, LeaseListItem, MaintenanceListItem, ResidenceListItem } from "@/lib/types";
 
 export const metadata: Metadata = { title: "Overview" };
 
 export default async function LandlordOverview() {
-  const [residences, applications] = await Promise.all([
+  const [residences, applications, maintenance, awaitingMoveIn] = await Promise.all([
     api.get<ResidenceListItem[]>("/landlord/residences"),
     api.get<ApplicationListItem[]>("/landlord/applications"),
+    api.get<MaintenanceListItem[]>("/landlord/maintenance?view=open"),
+    api.get<LeaseListItem[]>("/landlord/leases?status=PENDING_MOVE_IN"),
   ]);
 
   const toReview = applications.filter((a) => a.status === "SUBMITTED" || a.status === "UNDER_REVIEW");
   const offersOut = applications.filter((a) => a.status === "ACCEPTED").length;
   const availableBeds = residences.reduce((n, r) => n + r.availableBeds, 0);
+  const urgent = maintenance.filter((m) => m.priority === "URGENT").length;
 
   return (
     <>
       <PageHeader title="Overview" />
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <Stat label="Residences" value={residences.length} href="/landlord/residences" />
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
         <Stat label="Applications to review" value={toReview.length} href="/landlord/applications?status=SUBMITTED" />
         <Stat label="Offers awaiting student" value={offersOut} href="/landlord/applications?status=ACCEPTED" />
+        <Stat label="Awaiting move-in" value={awaitingMoveIn.length} href="/landlord/residents?status=PENDING_MOVE_IN" />
+        <Stat
+          label={urgent ? `Open maintenance (${urgent} urgent)` : "Open maintenance"}
+          value={maintenance.length}
+          href="/landlord/maintenance"
+        />
         <Stat label="Beds available" value={availableBeds} />
+        <Stat label="Residences" value={residences.length} href="/landlord/residences" />
       </div>
 
       <Card className="mt-6">
